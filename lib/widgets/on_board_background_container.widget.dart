@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:regulum/constants/themes.dart';
 import 'package:regulum/widgets/on_board_bottom_appbar.widget.dart';
@@ -9,10 +7,12 @@ class OnBoardBackgroundContainer extends StatelessWidget {
     Key? key,
     required this.child,
     required this.pageTo,
+    this.validateFunc,
   }) : super(key: key);
 
   final Widget child;
   final String pageTo;
+  final Future<bool> Function()? validateFunc;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,11 @@ class OnBoardBackgroundContainer extends StatelessWidget {
             tag: "Bottom_navigation_bar",
             child: Padding(
               padding: const EdgeInsets.only(right: 20, left: 20, bottom: 20),
-              child: Material(child: OnBoardBottomAppBar(pageTo: pageTo)),
+              child: Material(
+                  child: OnBoardBottomAppBar(
+                pageTo: pageTo,
+                validateFunc: validateFunc,
+              )),
             ),
           ),
         ),

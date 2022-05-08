@@ -3,9 +3,11 @@ import 'package:regulum/constants/themes.dart';
 
 class OnBoardBottomAppBar extends StatelessWidget {
   final String pageTo;
+  final Future<bool> Function()? validateFunc;
 
   const OnBoardBottomAppBar({
     required this.pageTo,
+    this.validateFunc,
     Key? key,
   }) : super(key: key);
 
@@ -30,7 +32,9 @@ class OnBoardBottomAppBar extends StatelessWidget {
             padding: const EdgeInsets.only(right: 11),
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).pushReplacementNamed(pageTo);
+                validateFunc!().then((bool value) {
+                  value ? Navigator.of(context).pushReplacementNamed(pageTo) : null;
+                });
               },
               child: const Icon(
                 Icons.arrow_circle_right_rounded,

@@ -19,6 +19,7 @@ class OnBoardCredentials extends StatefulWidget {
 }
 
 class _OnBoardCredentialsState extends State<OnBoardCredentials> {
+  Box randomBox = Hive.box("random");
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _passwordInputController;
   late final TextEditingController _confirmPasswordInputController;
@@ -39,9 +40,24 @@ class _OnBoardCredentialsState extends State<OnBoardCredentials> {
     });
   }
 
+  Future<bool> _validateFields() async {
+    if (_formKey.currentState!.validate()) {
+      Box userBox = Hive.box('user');
+      await userBox.put(
+        'credentials',
+        {"email": _emailInputController.text.toLowerCase(), "password": _confirmPasswordInputController.text},
+      );
+
+      return true;
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
+
+    randomBox.put("initilaized", 2);
 
     _passwordInputController = TextEditingController();
     _confirmPasswordInputController = TextEditingController();
@@ -60,6 +76,7 @@ class _OnBoardCredentialsState extends State<OnBoardCredentials> {
   Widget build(BuildContext context) {
     return OnBoardBackgroundContainer(
       pageTo: OnBoardProfile.route,
+      validateFunc: _validateFields,
       child: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -170,14 +187,9 @@ class _OnBoardCredentialsState extends State<OnBoardCredentials> {
                         textInputAction: TextInputAction.send,
                         keyboardType: TextInputType.visiblePassword,
                         onFieldSubmitted: (String? input) {
-                          if (_formKey.currentState!.validate()) {
-                            Box userBox = Hive.box('user');
-                            userBox.put(
-                              'credentials',
-                              {"email": _emailInputController.text.toLowerCase(), "password": _confirmPasswordInputController.text},
-                            );
-                            Navigator.of(context).pushReplacementNamed(OnBoardProfile.route);
-                          }
+                          _validateFields().then((bool value) {
+                            value ? Navigator.of(context).pushReplacementNamed(OnBoardProfile.route) : null;
+                          });
                         },
                       ),
                     ],

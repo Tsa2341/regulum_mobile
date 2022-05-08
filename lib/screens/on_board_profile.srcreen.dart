@@ -1,8 +1,10 @@
-import 'dart:ffi';
+import 'dart:developer';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:regulum/constants/themes.dart';
-import 'package:regulum/screens/on_board_congratulation.screen.dart';
 import 'package:regulum/screens/on_board_credentails.screen.dart';
 import 'package:regulum/utils/validations.util.dart';
 import 'package:regulum/widgets/on_board_background_container.widget.dart';
@@ -17,8 +19,10 @@ class OnBoardProfile extends StatefulWidget {
 }
 
 class _OnBoardProfileState extends State<OnBoardProfile> {
+  Box randomBox = Hive.box("random");
   final _formKey = GlobalKey<FormState>();
   dynamic _dropDownValue = "Male";
+  String? _profileImagePath;
 
   late final TextEditingController _famNameInputController;
   late final TextEditingController _givNameInputController;
@@ -27,9 +31,21 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
   late final TextEditingController _countryInputController;
   late final TextEditingController _dateInputController;
 
+  Future<bool> _validateFields() async {
+    return _formKey.currentState!.validate();
+  }
+
+  void _setProfileImage(String? image) {
+    setState(() {
+      _profileImagePath = image;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+
+    randomBox.put("initialized", 3);
 
     _famNameInputController = TextEditingController();
     _givNameInputController = TextEditingController();
@@ -55,6 +71,7 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
   Widget build(BuildContext context) {
     return OnBoardBackgroundContainer(
       pageTo: OnBoardCredentials.route,
+      validateFunc: _validateFields,
       child: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -161,23 +178,92 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
-                        controller: _famNameInputController,
+                        controller: _countryInputController,
                         cursorWidth: 1,
                         style: const TextStyle(fontSize: 12),
                         decoration: const InputDecoration(
-                          hintText: "Input your Family name",
-                          labelText: "Family Name",
+                          hintText: "Input your Country",
+                          labelText: "Country",
                         ),
                         validator: (String? input) {
                           if (!Validations.checkEmpty(input!)) {
-                            return "Family Name is required";
+                            return "Country is required";
                           }
                           return null;
                         },
                         textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.name,
+                        keyboardType: TextInputType.streetAddress,
                       ),
                       const SizedBox(height: 20),
+                      TextFormField(
+                        controller: _dateInputController,
+                        cursorWidth: 1,
+                        style: const TextStyle(fontSize: 12),
+                        decoration: const InputDecoration(
+                          hintText: "Click to choose your Birthday",
+                          labelText: "Date of Birth",
+                        ),
+                        enableInteractiveSelection: false,
+                        readOnly: true,
+                        onTap: () {
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1922),
+                            lastDate: DateTime.now(),
+                            useRootNavigator: false,
+                            initialEntryMode: DatePickerEntryMode.input,
+                          ).then((DateTime? value) {
+                            _dateInputController.text = '${value!.day}/${value.month}/${value.year}';
+                          });
+                        },
+                        validator: (String? input) {
+                          if (!Validations.checkEmpty(input!)) {
+                            return "Date of Birth is required";
+                          }
+                          return null;
+                        },
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.streetAddress,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          _profileImagePath != null
+                              ? Image.file(
+                                  File(_profileImagePath!),
+                                  width: 100,
+                                  height: 100,
+                                )
+                              : Text("no image")
+                        ],
+                      ),
+                      TextFormField(
+                        controller: _dateInputController,
+                        cursorWidth: 1,
+                        style: const TextStyle(fontSize: 12),
+                        decoration: const InputDecoration(
+                          hintText: "Click to UPload",
+                          labelText: "Date of Birth",
+                        ),
+                        enableInteractiveSelection: false,
+                        readOnly: true,
+                        onTap: () {
+                          FilePicker.platform.pickFiles(type: FileType.image).then((FilePickerResult? result) {
+                            _dateInputController.text = result!.files.single.path.toString();
+                            log(result.files.single.path.toString());
+                            _setProfileImage(result.files.single.path);
+                          });
+                        },
+                        validator: (String? input) {
+                          if (!Validations.checkEmpty(input!)) {
+                            return "Date of Birth is required";
+                          }
+                          return null;
+                        },
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.streetAddress,
+                      ),
                     ],
                   ),
                 ),

@@ -5,9 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:regulum/constants/themes.dart';
+import 'package:regulum/screens/on_board_congratulation.screen.dart';
 import 'package:regulum/screens/on_board_credentails.screen.dart';
 import 'package:regulum/screens/on_board_home.screen.dart';
 import 'package:regulum/screens/on_board_profile.srcreen.dart';
+import 'package:regulum/screens/on_board_sign_in.screen.dart';
 
 Future main() async {
   await Hive.initFlutter();
@@ -38,13 +40,13 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder(
         future: Future(() async {
           Box randomBox = Hive.box("random");
-          if (randomBox.get("initialized") == null) await randomBox.put("initialized", false);
+          if (randomBox.get("initialized") == null) await randomBox.put("initialized", 1);
 
           log(randomBox.get("initialized").toString());
         }),
         builder: (context, snapshot) {
           Box randomBox = Hive.box("random");
-          if (randomBox.get("initialized") == false) {
+          if (randomBox.get("initialized") != true) {
             return const OnBoardApp();
           } else {
             return const MainApp();
@@ -59,22 +61,23 @@ class MyApp extends StatelessWidget {
 class OnBoardApp extends StatelessWidget {
   const OnBoardApp({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: RegulumThemes.ligthTheme,
-      onGenerateRoute: (settings) {
-        if (settings.name == OnBoardCredentials.route) {
-          return _customPageRouteBuilder(settings, _onBoardCredentialsPageFunc);
-        }
-        if (settings.name == OnBoardProfile.route) {
-          return _customPageRouteBuilder(settings, _onBoardProfilePageFunc);
-        }
+  String _getInitialRoute() {
+    Box randomBox = Hive.box('random');
 
-        return _customPageRouteBuilder(settings, _onBoardHomePageFunc);
-      },
-      initialRoute: OnBoardHome.route,
-    );
+    switch (randomBox.get('initialized')) {
+      case 1:
+        return OnBoardHome.route;
+      case 2:
+        return OnBoardCredentials.route;
+      case 3:
+        return OnBoardProfile.route;
+      case 4:
+        return OnBoardSignIn.route;
+      case 5:
+        return OnBoardCongratulation.route;
+      default:
+        return OnBoardHome.route;
+    }
   }
 
   Widget _onBoardHomePageFunc(RouteSettings settings) {
@@ -111,6 +114,26 @@ class OnBoardApp extends StatelessWidget {
           child: child,
         );
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Box randomBox = Hive.box("random");
+
+    return MaterialApp(
+      theme: RegulumThemes.ligthTheme,
+      onGenerateRoute: (settings) {
+        if (settings.name == OnBoardCredentials.route) {
+          return _customPageRouteBuilder(settings, _onBoardCredentialsPageFunc);
+        }
+        if (settings.name == OnBoardProfile.route) {
+          return _customPageRouteBuilder(settings, _onBoardProfilePageFunc);
+        }
+
+        return _customPageRouteBuilder(settings, _onBoardHomePageFunc);
+      },
+      initialRoute: _getInitialRoute(),
     );
   }
 }
