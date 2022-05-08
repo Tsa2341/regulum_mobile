@@ -32,9 +32,14 @@ class OnBoardBottomAppBar extends StatelessWidget {
             padding: const EdgeInsets.only(right: 11),
             child: GestureDetector(
               onTap: () {
-                validateFunc!().then((bool value) {
-                  value ? Navigator.of(context).pushReplacementNamed(pageTo) : null;
-                });
+                if (validateFunc != null) {
+                  validateFunc!().then((bool value) {
+                    value ? Navigator.of(context).pushReplacementNamed(pageTo) : null;
+                  });
+                  return;
+                }
+
+                Navigator.of(context).pushReplacementNamed(pageTo);
               },
               child: const Icon(
                 Icons.arrow_circle_right_rounded,

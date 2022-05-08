@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:regulum/constants/colors.dart';
 import 'package:regulum/constants/themes.dart';
 import 'package:regulum/screens/on_board_credentails.screen.dart';
 import 'package:regulum/utils/validations.util.dart';
+import 'package:regulum/widgets/cutom_image_picker.widget.dart';
 import 'package:regulum/widgets/on_board_background_container.widget.dart';
+import 'package:shimmer/shimmer.dart';
 
 class OnBoardProfile extends StatefulWidget {
   const OnBoardProfile({Key? key}) : super(key: key);
@@ -22,7 +25,13 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
   Box randomBox = Hive.box("random");
   final _formKey = GlobalKey<FormState>();
   dynamic _dropDownValue = "Male";
-  String? _profileImagePath;
+  String? profileImagePath;
+
+  void _setProfileImagePath(String? image) {
+    setState(() {
+      profileImagePath = image;
+    });
+  }
 
   late final TextEditingController _famNameInputController;
   late final TextEditingController _givNameInputController;
@@ -33,12 +42,6 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
 
   Future<bool> _validateFields() async {
     return _formKey.currentState!.validate();
-  }
-
-  void _setProfileImage(String? image) {
-    setState(() {
-      _profileImagePath = image;
-    });
   }
 
   @override
@@ -75,6 +78,8 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
       child: Center(
         child: SingleChildScrollView(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 21),
@@ -226,48 +231,13 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
                         textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.streetAddress,
                       ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          _profileImagePath != null
-                              ? Image.file(
-                                  File(_profileImagePath!),
-                                  width: 100,
-                                  height: 100,
-                                )
-                              : Text("no image")
-                        ],
-                      ),
-                      TextFormField(
-                        controller: _dateInputController,
-                        cursorWidth: 1,
-                        style: const TextStyle(fontSize: 12),
-                        decoration: const InputDecoration(
-                          hintText: "Click to UPload",
-                          labelText: "Date of Birth",
-                        ),
-                        enableInteractiveSelection: false,
-                        readOnly: true,
-                        onTap: () {
-                          FilePicker.platform.pickFiles(type: FileType.image).then((FilePickerResult? result) {
-                            _dateInputController.text = result!.files.single.path.toString();
-                            log(result.files.single.path.toString());
-                            _setProfileImage(result.files.single.path);
-                          });
-                        },
-                        validator: (String? input) {
-                          if (!Validations.checkEmpty(input!)) {
-                            return "Date of Birth is required";
-                          }
-                          return null;
-                        },
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.streetAddress,
-                      ),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+              CustomImagePicker(profileImagePath, _setProfileImagePath),
+              const SizedBox(height: 20),
             ],
           ),
         ),
