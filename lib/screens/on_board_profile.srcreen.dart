@@ -1,16 +1,17 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:regulum/bloc/services/create_user.service.dart';
+import 'package:regulum/bloc/services/update_user_service.dart';
 import 'package:regulum/constants/colors.dart';
 import 'package:regulum/constants/themes.dart';
 import 'package:regulum/screens/on_board_credentails.screen.dart';
+import 'package:regulum/screens/on_board_sign_in.screen.dart';
 import 'package:regulum/utils/validations.util.dart';
 import 'package:regulum/widgets/cutom_image_picker.widget.dart';
 import 'package:regulum/widgets/on_board_background_container.widget.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:regulum/widgets/user_result_dialog.widget.dart';
 
 class OnBoardProfile extends StatefulWidget {
   const OnBoardProfile({Key? key}) : super(key: key);
@@ -22,58 +23,82 @@ class OnBoardProfile extends StatefulWidget {
 }
 
 class _OnBoardProfileState extends State<OnBoardProfile> {
-  Box randomBox = Hive.box("random");
-  final _formKey = GlobalKey<FormState>();
-  dynamic _dropDownValue = "Male";
-  String? profileImagePath;
+  String? _profileImagePath;
+  final Box _randomBox = Hive.box('random');
+  final Box _userBox = Hive.box("user");
 
-  void _setProfileImagePath(String? image) {
-    setState(() {
-      profileImagePath = image;
-    });
-  }
-
-  late final TextEditingController _famNameInputController;
-  late final TextEditingController _givNameInputController;
   late final TextEditingController _ageInputController;
-  late final TextEditingController _genderInputController;
-  late final TextEditingController _countryInputController;
+  late final TextEditingController _nationalityInputController;
   late final TextEditingController _dateInputController;
-
-  Future<bool> _validateFields() async {
-    return _formKey.currentState!.validate();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    randomBox.put("initialized", 3);
-
-    _famNameInputController = TextEditingController();
-    _givNameInputController = TextEditingController();
-    _ageInputController = TextEditingController();
-    _genderInputController = TextEditingController();
-    _countryInputController = TextEditingController();
-    _dateInputController = TextEditingController();
-  }
+  dynamic _dropDownValue = "Male";
+  late final TextEditingController _famNameInputController;
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _occupationInputController;
+  late final TextEditingController _givNameInputController;
 
   @override
   void dispose() {
     _famNameInputController.dispose();
     _givNameInputController.dispose();
     _ageInputController.dispose();
-    _genderInputController.dispose();
-    _countryInputController.dispose();
+    _occupationInputController.dispose();
+    _nationalityInputController.dispose();
     _dateInputController.dispose();
 
     super.dispose();
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    _randomBox.put("initialized", OnBoardProfile.route);
+
+    _famNameInputController = TextEditingController();
+    _givNameInputController = TextEditingController();
+    _ageInputController = TextEditingController();
+    _occupationInputController = TextEditingController();
+    _nationalityInputController = TextEditingController();
+    _dateInputController = TextEditingController();
+  }
+
+  void _setProfileImagePath(String? image) {
+    setState(() {
+      _profileImagePath = image;
+    });
+  }
+
+  Future<bool> _validateFields() async {
+    if (_formKey.currentState!.validate()) {
+      Map<String, dynamic> userData = {
+        'family_name': _famNameInputController.text,
+        'given_name': _givNameInputController.text,
+        'age': _ageInputController.text,
+        'nationality': _nationalityInputController.text,
+        'image': _profileImagePath,
+      };
+
+      dynamic dialogResponse = await showGeneralDialog(
+        context: context,
+        pageBuilder: (BuildContext contextDialog, __, ___) {
+          return UserResultDialog(title: "Updated Profile", serviceFunction: updateUser, userData: userData);
+        },
+      );
+
+      log(dialogResponse.toString());
+
+      if (dialogResponse) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return OnBoardBackgroundContainer(
-      pageTo: OnBoardCredentials.route,
+      pageTo: OnBoardLogin.route,
       validateFunc: _validateFields,
       child: Center(
         child: SingleChildScrollView(
@@ -88,7 +113,6 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
                   style: RegulumThemes.textTheme.headline6!.copyWith(fontWeight: FontWeight.w400),
                 ),
               ),
-              const SizedBox(height: 23),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 23),
                 child: Form(
@@ -183,16 +207,16 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
-                        controller: _countryInputController,
+                        controller: _nationalityInputController,
                         cursorWidth: 1,
                         style: const TextStyle(fontSize: 12),
                         decoration: const InputDecoration(
-                          hintText: "Input your Country",
-                          labelText: "Country",
+                          hintText: "Input your nationality",
+                          labelText: "nationality",
                         ),
                         validator: (String? input) {
                           if (!Validations.checkEmpty(input!)) {
-                            return "Country is required";
+                            return "nationality is required";
                           }
                           return null;
                         },
@@ -236,7 +260,7 @@ class _OnBoardProfileState extends State<OnBoardProfile> {
                 ),
               ),
               const SizedBox(height: 20),
-              CustomImagePicker(profileImagePath, _setProfileImagePath),
+              CustomImagePicker(_profileImagePath, _setProfileImagePath),
               const SizedBox(height: 20),
             ],
           ),

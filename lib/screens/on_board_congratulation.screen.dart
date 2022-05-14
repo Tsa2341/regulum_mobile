@@ -17,7 +17,7 @@ class _OnBoardCongratulationState extends State<OnBoardCongratulation> {
   void initState() {
     super.initState();
 
-    randomBox.put("initialized", 5);
+    randomBox.put("initialized", OnBoardCongratulation.route);
   }
 
   @override

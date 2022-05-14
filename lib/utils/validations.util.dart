@@ -28,7 +28,7 @@ abstract class Validations {
   }
 
   static bool checkPassword(String input) {
-    if (!RegExp(r'^(?=.*[0-9]+)(?=.*[A-Z]+)(?!.*[ \t\n\r]+).{8,}$').hasMatch(input)) {
+    if (!RegExp(r'^(?=.*[0-9])(?=.*[A-Z])(?!.*[ \t\n\r]+)(\w){8,}$').hasMatch(input)) {
       return false;
     }
 

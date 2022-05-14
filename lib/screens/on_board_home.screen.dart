@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:regulum/constants/themes.dart';
 import 'package:regulum/screens/on_board_credentails.screen.dart';
+import 'package:regulum/screens/on_board_sign_in.screen.dart';
 import 'package:regulum/widgets/on_board_background_container.widget.dart';
 
 class OnBoardHome extends StatefulWidget {
@@ -19,7 +20,7 @@ class _OnBoardHomeState extends State<OnBoardHome> {
   @override
   void initState() {
     super.initState();
-    randomBox.put("initialized", 1);
+    randomBox.put("initialized", OnBoardHome.route);
   }
 
   @override

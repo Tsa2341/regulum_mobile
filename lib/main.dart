@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:regulum/constants/themes.dart';
 import 'package:regulum/screens/on_board_congratulation.screen.dart';
@@ -12,6 +13,8 @@ import 'package:regulum/screens/on_board_profile.srcreen.dart';
 import 'package:regulum/screens/on_board_sign_in.screen.dart';
 
 Future main() async {
+  await dotenv.load(fileName: '.env');
+
   await Hive.initFlutter();
   await Hive.openBox<Map>('settings');
   await Hive.openBox('random');
@@ -65,15 +68,15 @@ class OnBoardApp extends StatelessWidget {
     Box randomBox = Hive.box('random');
 
     switch (randomBox.get('initialized')) {
-      case 1:
+      case OnBoardHome.route:
         return OnBoardHome.route;
-      case 2:
+      case OnBoardCredentials.route:
         return OnBoardCredentials.route;
-      case 3:
+      case OnBoardLogin.route:
+        return OnBoardLogin.route;
+      case OnBoardProfile.route:
         return OnBoardProfile.route;
-      case 4:
-        return OnBoardSignIn.route;
-      case 5:
+      case OnBoardCongratulation.route:
         return OnBoardCongratulation.route;
       default:
         return OnBoardHome.route;
@@ -119,8 +122,6 @@ class OnBoardApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Box randomBox = Hive.box("random");
-
     return MaterialApp(
       theme: RegulumThemes.ligthTheme,
       onGenerateRoute: (settings) {

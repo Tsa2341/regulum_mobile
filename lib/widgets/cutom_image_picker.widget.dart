@@ -36,7 +36,6 @@ class CustomImagePicker extends StatelessWidget {
                           margin: const EdgeInsets.all(30),
                           child: Image.file(
                             File(profileImagePath!),
-                            fit: BoxFit.fill,
                           ),
                         ),
                       );

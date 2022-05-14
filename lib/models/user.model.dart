@@ -1,20 +1,22 @@
-class User {
-  String id;
-  String email;
-  String password;
-  String? userName;
-  String? familyName;
-  String? givenName;
-  String? nationality;
-  String? occupation;
-  double? age;
-  String dateCreated;
-  String dateUpdated;
+import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 
-  User({
+@immutable
+class User extends Equatable {
+  final String id;
+  final String email;
+  final String? userName;
+  final String? familyName;
+  final String? givenName;
+  final String? nationality;
+  final String? occupation;
+  final double? age;
+  final String dateCreated;
+  final String dateUpdated;
+
+  const User({
     required this.id,
     required this.email,
-    required this.password,
     this.userName,
     this.familyName,
     this.givenName,
@@ -24,4 +26,18 @@ class User {
     required this.dateCreated,
     required this.dateUpdated,
   });
+
+  @override
+  List<Object?> get props => [
+        id,
+        email,
+        userName,
+        familyName,
+        givenName,
+        nationality,
+        occupation,
+        age,
+        dateCreated,
+        dateUpdated,
+      ];
 }

@@ -27,6 +27,7 @@ abstract class RegulumThemes {
     ),
     inputDecorationTheme: InputDecorationTheme(
       focusColor: const Color(0xff25E48E),
+      errorStyle: TextStyle(fontSize: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(7),
         borderSide: const BorderSide(width: 4),
